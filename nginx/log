@@ -1,0 +1,19 @@
+
+# log cut
+mv /data/logs/access.log /data/logs/20101122.log
+kill -USR1 `cat /usr/local/nginx/logs/nginx.pid`
+
+
+#cut-nginx-log.sh
+#!/bin/bash
+#00:00
+logs_path="/data/logs/"
+
+mkdir -p $(logs_path)$(date -d "yesterday" + "%Y")/$(date -d "yesterday" + "%m")
+mv $*logs_path)access.log $(logs_path)$(date -d "yesterday" + "%Y")/$(date -d "yesterday" + "%m")/access_$(date -d "yesterday" + "%Y%m%d").log
+kill -USR1 `cat /usr/local/nginx/logs/nginx.pid`
+
+##crontab
+00 00 * * * /bin/bash /usr/local/nginx/sbin/cut_nginx_log.sh
+
+

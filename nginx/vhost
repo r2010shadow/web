@@ -1,0 +1,110 @@
+##whatis
+
+
+# include other vhost conf
+http
+{
+
+    include          /usr/local/nginx/conf/vhosts/web-base.conf;
+}
+
+#web-base.conf
+server {
+       listen       80;
+       server_name  139.196.178.65;
+
+       rewrite ^(.*)$ http://www.myweb.com;   
+}
+
+server {
+        listen       80;
+        server_name  base.1.service;
+
+        charset utf-8;
+
+        #access_log  /mnt/data/logs/nginx/host.access.log  main;
+        #access_log  /mnt/data/logs/nginx/access.log;
+        #error_log   /mnt/data/logs/nginx/dev.lexuetao-error.log;
+		
+        root /usr/local/code/web-base/;
+		
+        index index.php;
+		
+       location /admin {
+       #      rewrite ^(.*)$ http://www.myweb.com;
+            if (!-f $request_filename){
+              rewrite (.*) /admin/index.php;
+            }
+       }
+		
+        location ~ \.php$ {
+             fastcgi_pass   127.0.0.1:9000;
+             fastcgi_index  index.php;
+             fastcgi_param  SCRIPT_FILENAME  /usr/local/code/web-base/$fastcgi_script_name;
+             include        fastcgi_params;
+             client_max_body_size    300m;
+             client_body_buffer_size 300m;
+        }
+    }
+
+
+
+--------------------------------------------
+
+
+# IP VHOST
+#one machine multi IP
+ifconfig eth0:1 [aliasIP] broadcast x.x.x.255 netmask 255.255.255.0 up
+route add -host [aliasIP] dev eth0:1
+
+ifconfig eth0:2 [aliasIP] broadcast x.x.x.255 netmask 255.255.255.0 up
+route add -host [aliasIP] dev eth0:2 
+###Add to rc.local 
+
+http
+{
+	server
+	{
+		listen [aliasIP]:80;
+		server_name [aliasIP];
+		access_log logs/server1.access.log combined;
+		location /
+		{
+			index index.html index.htm;
+			root /data0/htdocs/server1;
+		}
+	}
+	server
+	{
+		... ...
+}
+---------------------------------------------
+
+
+
+# DNS VHOST
+
+http
+{
+        server
+        {
+                listen 80;
+                server_name aaa.domain.com;
+                access_log logs/aaa.domain.com.access.log combined;
+                location /
+                {
+                        index index.html index.htm;
+                        root /data0/htdocs/aaa.domain.com;
+                }
+        }
+        server
+        {
+                ... ...
+}
+
+---------------------------------------------
+
+
+
+
+# PORT VHOST
